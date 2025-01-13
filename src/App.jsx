@@ -1,47 +1,4 @@
 
-// import React from 'react';
-// import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
-// import VehicalMaster from './pages/VehicalMaster';
-// import DriverMaster from './pages/DriverMaster';
-// import ExpanceMaster from './pages/ExpanceMaster';
-// import PinMaster from './pages/PinMaster';
-// import Sidebar from './components/Sidebar';
-// import Dashboard from './pages/Dashboard';
-// import LoginPage from './components/Login';
-// import SignupPage from './components/Signup';
-
-// const App = () => {
-//   return (
-//     <BrowserRouter>
-//       <Routes>
-//         {/* Redirect to /login on first render */}
-//         <Route path="/" element={<Navigate to="/login" replace />} />
-
-//         {/* Login and Signup Routes without Sidebar */}
-//         <Route path="/login" element={<LoginPage />} />
-//         <Route path="/registration" element={<SignupPage />} />
-        
-//         {/* Protected Routes with Sidebar */}
-//         <Route
-//           path="/*"
-//           element={
-//             <Sidebar>
-//               <Routes>
-//                 <Route path="/dashboard" element={<Dashboard />} />
-//                 <Route path="/vehical-master" element={<VehicalMaster />} />
-//                 <Route path="/driver-master" element={<DriverMaster />} />
-//                 <Route path="/expancemanagement" element={<ExpanceMaster />} />
-//                 <Route path="/pinmaster" element={<PinMaster />} />
-//               </Routes>
-//             </Sidebar>
-//           }
-//         />
-//       </Routes>
-//     </BrowserRouter>
-//   );
-// };
-
-// export default App;
 
 
 import React from "react";
@@ -83,6 +40,8 @@ const App = () => {
                     <Route path="/driver-master" element={<DriverMaster />} />
                     <Route path="/expancemanagement" element={<ExpanceMaster />} />
                     <Route path="/pinmaster" element={<PinMaster />} />
+                    <Route path="/vehical-masterr" element={<VehicalMaster />} />
+                    <Route path="/drivermaster" element={<DriverMaster />} />
                   </Routes>
                 </Sidebar>
               </ProtectedRoute>
