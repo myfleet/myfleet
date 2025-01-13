@@ -1,29 +1,43 @@
-// import React from "react";
-// import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-// import LoginPage from "./components/Login";
-
-// import FleetComponent from "./components/Dashboard";
-// import Header from "./components/Header";
-// import SignupPage from "./components/Signup";
-
-
+// import React from 'react';
+// import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
+// import VehicalMaster from './pages/VehicalMaster';
+// import DriverMaster from './pages/DriverMaster';
+// import ExpanceMaster from './pages/ExpanceMaster';
+// import PinMaster from './pages/PinMaster';
+// import Sidebar from './components/Sidebar';
+// import Dashboard from './pages/Dashboard';
+// import LoginPage from './components/Login';
+// import SignupPage from './components/Signup';
 
 // const App = () => {
 //   return (
-//     <Router>
-    
-      
-//       <Header/>
-      
+//     <BrowserRouter>
 //       <Routes>
+//         {/* Redirect to /login on first render */}
+//         <Route path="/" element={<Navigate to="/login" replace />} />
+
+//         {/* Login and Signup Routes without Sidebar */}
+//         <Route path="/login" element={<LoginPage />} />
+//         <Route path="/registration" element={<SignupPage />} />
         
-//        <Route path="/" element={<FleetComponent/>} />
-//         <Route path="/login" element={<LoginPage/>} />
-//         <Route path="/registration" element={  <SignupPage/>} />
-      
+//         {/* Protected Routes with Sidebar */}
+//         <Route
+//           path="/*"
+//           element={
+//             <Sidebar>
+//               <Routes>
+//                 <Route path="/dashboard" element={<Dashboard />} />
+//                 <Route path="/vehical-master" element={<VehicalMaster />} />
+//                 <Route path="/driver-master" element={<DriverMaster />} />
+//                 <Route path="/expancemanagement" element={<ExpanceMaster />} />
+//                 <Route path="/pinmaster" element={<PinMaster />} />
+//               </Routes>
+//             </Sidebar>
+//           }
+//         />
 //       </Routes>
-//     </Router>
+//     </BrowserRouter>
 //   );
 // };
 
@@ -31,38 +45,52 @@
 
 
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 
+
+import VehicalMaster from "./pages/VehicalMaster";
+import DriverMaster from "./pages/DriverMaster";
+import ExpanceMaster from "./pages/ExpanceMaster";
+import PinMaster from "./pages/PinMaster";
+import Sidebar from "./components/Sidebar";
+import Dashboard from "./pages/Dashboard";
 import LoginPage from "./components/Login";
-import FleetComponent from "./components/Dashboard";
-import Header from "./components/Header";
 import SignupPage from "./components/Signup";
+import { AuthProvider } from "./auth/AuthContext";
+import ProtectedRoute from "./auth/ProtectedRoute";
 
 const App = () => {
-  const AppWrapper = () => {
-    const location = useLocation();
-
-    // Define routes where Header should not appear
-    const hideHeaderRoutes = ["/login", "/registration"];
-    const shouldHideHeader = hideHeaderRoutes.includes(location.pathname);
-
-    return (
-      <>
-        {/* Conditionally render Header */}
-        {!shouldHideHeader && <Header />}
+  return (
+    <AuthProvider>
+      <BrowserRouter>
         <Routes>
-          <Route path="/" element={<FleetComponent />} />
+          {/* Redirect to /login on first render */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
+
+          {/* Login and Signup Routes */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/registration" element={<SignupPage />} />
-        </Routes>
-      </>
-    );
-  };
 
-  return (
-    <Router>
-      <AppWrapper />
-    </Router>
+          {/* Protected Routes */}
+          <Route
+            path="/*"
+            element={
+              <ProtectedRoute>
+                <Sidebar>
+                  <Routes>
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/vehical-master" element={<VehicalMaster />} />
+                    <Route path="/driver-master" element={<DriverMaster />} />
+                    <Route path="/expancemanagement" element={<ExpanceMaster />} />
+                    <Route path="/pinmaster" element={<PinMaster />} />
+                  </Routes>
+                </Sidebar>
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 };
 
