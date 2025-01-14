@@ -31,10 +31,10 @@ const SignupPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+   
     try {
       const response = await axios.post(
-        "https://fleet-node.vercel.app/api/register",
+        "https://node-fleet.vercel.app/api/register",
         formData,
         { headers: { "Content-Type": "application/json" } }
       );
