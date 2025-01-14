@@ -168,7 +168,7 @@ const LoginPage = () => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        "https://fleet-node.vercel.app/api/signin",
+        "https://node-fleet.vercel.app/api/signin",
         { email, password },
         { headers: { "Content-Type": "application/json" } }
       );
