@@ -115,7 +115,7 @@ const LandingPage = () => {
       {/* Footer Section */}
       <footer className="bg-gray-900  mt-20 text-white text-center py-4">
         <p className="text-sm">
-          &copy; {new Date().getFullYear()} MyFleet... All rights reserved.
+          &copy; {new Date().getFullYear()} MyFleet... Alls rights reserved.
         </p>
       </footer>
     </div>
