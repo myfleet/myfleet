@@ -223,7 +223,7 @@ const LoginPage = () => {
           Sign In
         </h1>
         <h2 className="text-lg text-center text-gray-600 mb-8">
-          Welcome to <span className="font-semibold text-blue-800">MyFleet</span>
+          Welcome to <span className="font-semibold text-blue-800">My Fleet</span>
         </h2>
 
         {/* Form */}
