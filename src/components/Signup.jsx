@@ -326,7 +326,7 @@ const SignupPage = () => {
     address: /^[A-Za-z0-9\s,.-]{1,200}$/,
     pincode: /^\d{6}$/,
     state: /^[A-Za-z\s]{1,50}$/,
-    password: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/,
+    password: /^[A-Za-z\s]{1,50}$/,
   };
 
   const validateField = (name, value) => {
@@ -413,7 +413,7 @@ const SignupPage = () => {
 
     try {
       const response = await axios.post(
-        "https://node-fleet.vercel.app/api/register",
+        "https://fleet-node.vercel.app/api/register",
         formData,
         { headers: { "Content-Type": "application/json" } }
       );
