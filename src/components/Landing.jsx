@@ -30,13 +30,13 @@ const HeroSection = () => {
         {/* Call to Action Buttons */}
         <div className="flex justify-center space-x-6 mb-16 animate-slide-up delay-100">
           <a
-            href="#get-started"
+            href="/registration"
             className="bg-yellow-400 text-gray-900 px-8 py-4 rounded-full text-lg font-semibold hover:bg-yellow-300 transition-transform transform hover:scale-105 shadow-lg"
           >
             Start Your Journey
           </a>
           <a
-            href="#learn-more"
+            href="/about"
             className="border-2 border-yellow-400 text-yellow-400 px-8 py-4 rounded-full text-lg font-semibold hover:bg-yellow-400 hover:text-gray-900 transition-transform transform hover:scale-105 shadow-lg"
           >
             Discover myFleet
@@ -52,7 +52,7 @@ const HeroSection = () => {
               Track and manage your fleet in real-time with advanced GPS, automated scheduling, and performance analytics.
             </p>
             <img
-              src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
+              src="/image/fleet1.jpg"
               alt="Fleet Management"
               className="mt-6 rounded-lg shadow-md w-full h-40 object-cover"
             />
@@ -64,7 +64,7 @@ const HeroSection = () => {
               Prevent breakdowns with AI-driven diagnostics and proactive maintenance alerts customized for your fleet.
             </p>
             <img
-              src="https://images.unsplash.com/photo-1611078489935-0cb7c24107b6?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
+              src="/image/fleet2.jpg"
               alt="Maintenance Tools"
               className="mt-6 rounded-lg shadow-md w-full h-40 object-cover"
             />
@@ -76,7 +76,7 @@ const HeroSection = () => {
               Streamline operations with optimized routes, reduced fuel costs, and intelligent scheduling.
             </p>
             <img
-              src="https://images.unsplash.com/photo-1586528116311-ad8dd3a8dd22?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
+              src="/image/fleet4.avif"
               alt="Time Efficiency"
               className="mt-6 rounded-lg shadow-md w-full h-40 object-cover"
             />
@@ -88,7 +88,7 @@ const HeroSection = () => {
               Make informed decisions with comprehensive analytics and detailed reports tailored to your business needs.
             </p>
             <img
-              src="https://images.unsplash.com/photo-1551288049-b1f3a0a9e845?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
+              src="/image/fleet5.avif"
               alt="Data Analytics"
               className="mt-6 rounded-lg shadow-md w-full h-40 object-cover"
             />
@@ -106,7 +106,7 @@ const HeroSection = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="relative">
               <img
-                src="https://images.unsplash.com/photo-1565110131394-5be31802b92e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                src="/image/fleet6.avif"
                 alt="Logistics Operations"
                 className="rounded-2xl shadow-2xl w-full h-64 object-cover"
               />
