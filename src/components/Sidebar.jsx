@@ -25,10 +25,10 @@ const Sidebar = ({ children }) => {
   const menuItems = [
     { path: "/vehical-masterr", name: "Create Vehicle Master", icon: <FaCarAlt /> },
     { path: "/drivermaster", name: "Create Driver Master", icon: <FaUserAlt /> },
-    { path: "/pin-master", name: "Pin Master", icon: <FaMapMarkerAlt /> },
+    { path: "/tripmaster", name: " Trip Master", icon: <FaTruck /> },
     { path: "/expancemanagement", name: "Create Expense Master", icon: <FaMoneyBillAlt /> },
-    { path: "/assign-driver", name: "Assign Driver to Vehicle", icon: <FaUserTie /> },
-    { path: "/create-trip", name: "Create Trip", icon: <FaTruck /> },
+    { path: "/pin-master", name: "Pin Master", icon: <FaMapMarkerAlt /> },
+    { path: "/assign-driver", name: "Assign Driver to Vehicle", icon: <FaUserTie /> }, 
     { path: "/create-trip-expense", name: "Create Trip Wise Expense", icon: <FaReceipt /> },
     { path: "/create-trip-invoice", name: "Create Trip Wise Invoice", icon: <FaFileInvoiceDollar /> },
     { path: "/create-trip-payment", name: "Create Trip Wise Payment", icon: <FaMoneyBillAlt /> },

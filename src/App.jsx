@@ -18,6 +18,7 @@ import ProtectedRoute from "./auth/ProtectedRoute";
 import HeroSection from "./components/Landing";
 import AboutUs from "./components/About";
 import ContactUs from "./components/ContactUs";
+import TripMaster from "./pages/TripMaster";
 
 const App = () => {
   return (
@@ -47,6 +48,7 @@ const App = () => {
                     <Route path="/pinmaster" element={<PinMaster />} />
                     <Route path="/vehical-masterr" element={<VehicalMaster />} />
                     <Route path="/drivermaster" element={<DriverMaster />} />
+                    <Route path="/tripmaster" element={<TripMaster />} />
                   </Routes>
                 </Sidebar>
               </ProtectedRoute>
