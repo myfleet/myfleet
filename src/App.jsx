@@ -19,6 +19,7 @@ import HeroSection from "./components/Landing";
 import AboutUs from "./components/About";
 import ContactUs from "./components/ContactUs";
 import TripMaster from "./pages/TripMaster";
+import MisReport from "./admin/MisReport";
 
 const App = () => {
   return (
@@ -33,6 +34,8 @@ const App = () => {
           <Route path="/registration" element={<SignupPage />} />
           <Route path="/about" element={<AboutUs />} />
           <Route path="/Contact-us" element={<ContactUs />} />
+          <Route path="/Admin" element={<MisReport />} />
+
 
           {/* Protected Routes */}
           <Route
