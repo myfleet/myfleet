@@ -3,31 +3,63 @@ import Header from '../components/Header';
 import axios from 'axios';
 
 const MisReport = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
   const [trips, setTrips] = useState([]);
   const [selectedTrip, setSelectedTrip] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchTrips = async () => {
-      try {
-        const config = {
-          method: 'get',
-          url: 'https://fleet-node.vercel.app/api/mis_report',
-          headers: {},
-        };
-        const response = await axios.request(config);
-        setTrips(response.data);
-        setLoading(false);
-      } catch (err) {
-        setError('Failed to fetch trips. Please try again.');
-        setLoading(false);
-        console.error('Error fetching trips:', err);
-      }
-    };
-
-    fetchTrips();
+    const isLoggedIn = localStorage.getItem('isAuthenticated');
+    if (isLoggedIn === 'true') {
+      setIsAuthenticated(true);
+      fetchTrips();
+    } else {
+      setLoading(false);
+    }
   }, []);
+
+  const fetchTrips = async () => {
+    try {
+      const config = {
+        method: 'get',
+        url: 'https://fleet-node.vercel.app/api/mis_report',
+        headers: {},
+      };
+      const response = await axios.request(config);
+      setTrips(response.data);
+      setLoading(false);
+    } catch (err) {
+      setError('Failed to fetch trips. Please try again.');
+      setLoading(false);
+      console.error('Error fetching trips:', err);
+    }
+  };
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (email === 'vikas@gmail.com' && password === 'myfleet') {
+      setIsAuthenticated(true);
+      localStorage.setItem('isAuthenticated', 'true');
+      setLoginError('');
+      setLoading(true);
+      fetchTrips();
+    } else {
+      setLoginError('Invalid email or password');
+    }
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    localStorage.removeItem('isAuthenticated');
+    setTrips([]);
+    setSelectedTrip(null);
+    setEmail('');
+    setPassword('');
+  };
 
   const handleTripClick = (trip) => {
     setSelectedTrip(trip);
@@ -49,6 +81,104 @@ const MisReport = () => {
   const closeDetails = () => {
     setSelectedTrip(null);
   };
+
+  if (!isAuthenticated) {
+    return (
+    //   <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+    //     <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
+    //       <h2 className="text-2xl font-bold mb-4 text-center"> Admin Login</h2>
+    //       <div className="flex items-center justify-center mb-6">
+          
+    //       </div>
+    //       <div>
+    //         <div className="mb-4">
+    //           <label className="block text-gray-700 mb-2" htmlFor="email">
+    //             Email
+    //           </label>
+    //           <input
+    //             type="email"
+    //             id="email"
+    //             value={email}
+    //             onChange={(e) => setEmail(e.target.value)}
+    //             className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+    //             placeholder="Enter your email"
+    //           />
+    //         </div>
+    //         <div className="mb-4">
+    //           <label className="block text-gray-700 mb-2" htmlFor="password">
+    //             Password
+    //           </label>
+    //           <input
+    //             type="password"
+    //             id="password"
+    //             value={password}
+    //             onChange={(e) => setPassword(e.target.value)}
+    //             className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+    //             placeholder="Enter your password"
+    //           />
+    //         </div>
+    //         {loginError && <p className="text-red-500 text-sm mb-4">{loginError}</p>}
+    //         <button
+    //           onClick={handleLogin}
+    //           className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition duration-200"
+    //         >
+    //           Login
+    //         </button>
+    //       </div>
+    //     </div>
+    //   </div>
+
+    <div className="min-h-screen bg-gradient-to-br from-blue-400 via-purple-400 to-pink-400 flex items-center justify-center p-4">
+    <div className="bg-white/90 backdrop-blur-md p-8 rounded-2xl shadow-xl w-full max-w-md border border-white/30">
+      <div className="flex items-center justify-center mb-6">
+        {/* <img
+          src="https://www.svgrepo.com/show/265058/truck-delivery-truck.svg"
+          alt="Logo"
+          className="h-16 w-16 transform transition-transform hover:scale-110"
+        /> */}
+      </div>
+      <h2 className="text-3xl font-extrabold mb-6 text-center text-gray-800">Admin Login</h2>
+      <div>
+        <div className="mb-5">
+          <label className="block text-gray-600 mb-2 font-medium" htmlFor="email">
+            Email
+          </label>
+          <input
+            type="email"
+            id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300 placeholder-gray-400"
+            placeholder="Enter your email"
+          />
+        </div>
+        <div className="mb-5">
+          <label className="block text-gray-600 mb-2 font-medium" htmlFor="password">
+            Password
+          </label>
+          <input
+            type="password"
+            id="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300 placeholder-gray-400"
+            placeholder="Enter your password"
+          />
+        </div>
+        {loginError && (
+          <p className="text-red-500 text-sm mb-4 text-center bg-red-100/50 p-2 rounded">{loginError}</p>
+        )}
+        <button
+          onClick={handleLogin}
+          className="w-full bg-blue-600 text-white p-3 rounded-lg font-semibold hover:bg-blue-700 transform hover:scale-105 transition-all duration-300 active:scale-95"
+        >
+          Login
+        </button>
+      </div>
+    </div>
+  </div> 
+    );
+  }
 
   if (loading) {
     return (
@@ -72,7 +202,15 @@ const MisReport = () => {
     <div className="min-h-screen bg-gray-100">
       <Header />
       <div className="container mt-16 mx-auto p-4">
-        <h2 className="text-2xl font-bold mb-4">MIS Report - Trip List</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-bold">MIS Report - Trip List</h2>
+          <button
+            onClick={handleLogout}
+            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition duration-200"
+          >
+            Logout
+          </button>
+        </div>
         <div className="grid gap-4">
           {trips.map((trip, index) => (
             <div
@@ -101,7 +239,9 @@ const MisReport = () => {
         {selectedTrip && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
             <div className="bg-white rounded-lg p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-              <h3 className="text-2xl font-bold mb-4 text-center">Trip Bill - ID: {trips.findIndex(t => t.id === selectedTrip.id) + 1}</h3>
+              <h3 className="text-2xl font-bold mb-4 text-center">
+                Trip Bill - ID: {trips.findIndex((t) => t.id === selectedTrip.id) + 1}
+              </h3>
               <div className="border border-gray-300 rounded-lg p-4">
                 {/* Bill Header */}
                 <div className="mb-4">
