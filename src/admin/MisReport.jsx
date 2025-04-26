@@ -131,11 +131,7 @@ const MisReport = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-400 via-purple-400 to-pink-400 flex items-center justify-center p-4">
     <div className="bg-white/90 backdrop-blur-md p-8 rounded-2xl shadow-xl w-full max-w-md border border-white/30">
       <div className="flex items-center justify-center mb-6">
-        {/* <img
-          src="https://www.svgrepo.com/show/265058/truck-delivery-truck.svg"
-          alt="Logo"
-          className="h-16 w-16 transform transition-transform hover:scale-110"
-        /> */}
+      
       </div>
       <h2 className="text-3xl font-extrabold mb-6 text-center text-gray-800">Admin Login</h2>
       <div>

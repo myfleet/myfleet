@@ -27,7 +27,7 @@ const LoginPage = () => {
       const { name, companyName } = response.data;
       toast.success(`Welcome back, ${name} from ${companyName}!`, {
         position: "top-right",
-        autoClose: 3000,
+        autoClose: 300,
         hideProgressBar: true,
         closeOnClick: true,
         pauseOnHover: true,
@@ -38,13 +38,13 @@ const LoginPage = () => {
       login();
       setTimeout(() => {
         navigate("/dashboard");
-      }, 3000);
+      }, 300);
     } catch (err) {
       const errorMessage =
         err.response?.data?.error || "Something went wrong. Please try again.";
       toast.error(errorMessage, {
         position: "top-right",
-        autoClose: 3000,
+        autoClose: 300,
         hideProgressBar: true,
         closeOnClick: true,
         pauseOnHover: true,
