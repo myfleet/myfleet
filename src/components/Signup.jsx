@@ -1,4 +1,5 @@
 
+
 // import React, { useState } from "react";
 // import { useNavigate } from "react-router-dom";
 // import axios from "axios";
@@ -25,7 +26,7 @@
 //   const [showPassword, setShowPassword] = useState(false);
 //   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-//   // Validation patterns
+//   // Validation patterns (removed password pattern)
 //   const patterns = {
 //     name: /^[A-Za-z\s]{1,50}$/,
 //     email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
@@ -35,7 +36,6 @@
 //     address: /^[A-Za-z0-9\s,.-]{1,200}$/,
 //     pincode: /^\d{6}$/,
 //     state: /^[A-Za-z\s]{1,50}$/,
-//     password: /^[A-Za-z\s]{1,50}$/,
 //   };
 
 //   const validateField = (name, value) => {
@@ -61,9 +61,7 @@
 //       case "state":
 //         return patterns.state.test(value) ? "" : "State must contain only alphabets and spaces.";
 //       case "password":
-//         return patterns.password.test(value)
-//           ? ""
-//           : "Password must be at least 8 characters long and include one letter and one number.";
+//         return ""; // No validation for password
 //       case "confirmPassword":
 //         return value === formData.password ? "" : "Passwords do not match.";
 //       default:
@@ -502,12 +500,14 @@ const SignupPage = () => {
     state: "",
     password: "",
     confirmPassword: "",
+    otp: ""
   });
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isOtpSent, setIsOtpSent] = useState(false);
 
-  // Validation patterns (removed password pattern)
+  // Validation patterns
   const patterns = {
     name: /^[A-Za-z\s]{1,50}$/,
     email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
@@ -517,6 +517,7 @@ const SignupPage = () => {
     address: /^[A-Za-z0-9\s,.-]{1,200}$/,
     pincode: /^\d{6}$/,
     state: /^[A-Za-z\s]{1,50}$/,
+    otp: /^\d{6}$/
   };
 
   const validateField = (name, value) => {
@@ -545,6 +546,8 @@ const SignupPage = () => {
         return ""; // No validation for password
       case "confirmPassword":
         return value === formData.password ? "" : "Passwords do not match.";
+      case "otp":
+        return patterns.otp.test(value) ? "" : "OTP must be exactly 6 digits.";
       default:
         return "";
     }
@@ -555,7 +558,7 @@ const SignupPage = () => {
 
     // Restrict input based on field type
     let filteredValue = value;
-    if (name === "mobile" || name === "pincode") {
+    if (name === "mobile" || name === "pincode" || name === "otp") {
       filteredValue = value.replace(/\D/g, "");
     } else if (name === "name" || name === "state") {
       filteredValue = value.replace(/[^A-Za-z\s]/g, "");
@@ -577,14 +580,16 @@ const SignupPage = () => {
   const validateForm = () => {
     const newErrors = {};
     Object.keys(formData).forEach((key) => {
-      const error = validateField(key, formData[key]);
-      if (error) newErrors[key] = error;
+      if (key !== "otp" || isOtpSent) {
+        const error = validateField(key, formData[key]);
+        if (error) newErrors[key] = error;
+      }
     });
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSendOtp = async (e) => {
     e.preventDefault();
     if (!validateForm()) {
       toast.error("Please fix the errors in the form.", {
@@ -601,9 +606,25 @@ const SignupPage = () => {
 
     try {
       const response = await axios.post(
-        "https://fleet-node.vercel.app/api/register",
-        formData,
-        { headers: { "Content-Type": "application/json" } }
+        "https://fleet-node.vercel.app/api/send-otp",
+        {
+          name: formData.name,
+          email: formData.email,
+          mobile: formData.mobile,
+          dob: formData.dob,
+          companyName: formData.companyName,
+          gstNumber: formData.gstNumber,
+          address: formData.address,
+          pincode: formData.pincode,
+          state: formData.state,
+          password: formData.password,
+          confirmPassword: formData.confirmPassword
+        },
+        {
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }
       );
 
       toast.success(response.data.message, {
@@ -615,13 +636,74 @@ const SignupPage = () => {
         draggable: true,
         theme: "colored",
       });
-
-      setTimeout(() => {
-        navigate("/login");
-      }, 3000);
+      setIsOtpSent(true);
     } catch (err) {
       const errorMessage =
-        err.response?.data?.error || "Something went wrong. Please try again.";
+        err.response?.data?.error || "Failed to send OTP. Please try again.";
+      toast.error(errorMessage, {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "colored",
+      });
+    }
+  };
+
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault();
+    
+    // Validate OTP field
+    const otpError = validateField("otp", formData.otp);
+    if (otpError) {
+      toast.error("Please enter a valid 6-digit OTP.", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "colored",
+      });
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        "https://fleet-node.vercel.app/api/verify-register",
+        {
+          email: formData.email,
+          otp: formData.otp
+        },
+        {
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }
+      );
+
+      if (response.data.message === "Registration successful") {
+        toast.success("Registration successful! Redirecting to login...", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "colored",
+        });
+
+        setTimeout(() => {
+          navigate("/login");
+        }, 3000);
+      } else {
+        throw new Error(response.data.message || "Unexpected response from server");
+      }
+    } catch (err) {
+      const errorMessage =
+        err.response?.data?.error || "OTP verification failed. Please try again.";
       toast.error(errorMessage, {
         position: "top-right",
         autoClose: 3000,
@@ -676,257 +758,281 @@ const SignupPage = () => {
           Join <span className="font-semibold text-blue-800">myFleet</span> Today
         </h2>
 
-        <form onSubmit={handleSubmit}>
-          {/* Row 1 */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <div>
-              <label htmlFor="name" className="block text-gray-700 font-semibold mb-2">
-                Name
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                placeholder="Enter your name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition bg-gray-50 ${
-                  errors.name ? "border-red-500" : "border-gray-300"
-                }`}
-              />
-              {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
-            </div>
-            <div>
-              <label htmlFor="email" className="block text-gray-700 font-semibold mb-2">
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                placeholder="Enter your email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition bg-gray-50 ${
-                  errors.email ? "border-red-500" : "border-gray-300"
-                }`}
-              />
-              {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
-            </div>
-            <div>
-              <label htmlFor="mobile" className="block text-gray-700 font-semibold mb-2">
-                Mobile
-              </label>
-              <input
-                type="text"
-                id="mobile"
-                name="mobile"
-                placeholder="Enter your mobile number"
-                value={formData.mobile}
-                onChange={handleChange}
-                maxLength={10}
-                required
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition bg-gray-50 ${
-                  errors.mobile ? "border-red-500" : "border-gray-300"
-                }`}
-              />
-              {errors.mobile && <p className="text-red-500 text-sm mt-1">{errors.mobile}</p>}
-            </div>
-          </div>
+        <form onSubmit={isOtpSent ? handleVerifyOtp : handleSendOtp}>
+          {!isOtpSent ? (
+            <>
+              {/* Row 1 */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div>
+                  <label htmlFor="name" className="block text-gray-700 font-semibold mb-2">
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    placeholder="Enter your name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition bg-gray-50 ${
+                      errors.name ? "border-red-500" : "border-gray-300"
+                    }`}
+                  />
+                  {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+                </div>
+                <div>
+                  <label htmlFor="email" className="block text-gray-700 font-semibold mb-2">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="Enter your email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition bg-gray-50 ${
+                      errors.email ? "border-red-500" : "border-gray-300"
+                    }`}
+                  />
+                  {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+                </div>
+                <div>
+                  <label htmlFor="mobile" className="block text-gray-700 font-semibold mb-2">
+                    Mobile
+                  </label>
+                  <input
+                    type="text"
+                    id="mobile"
+                    name="mobile"
+                    placeholder="Enter your mobile number"
+                    value={formData.mobile}
+                    onChange={handleChange}
+                    maxLength={10}
+                    required
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition bg-gray-50 ${
+                      errors.mobile ? "border-red-500" : "border-gray-300"
+                    }`}
+                  />
+                  {errors.mobile && <p className="text-red-500 text-sm mt-1">{errors.mobile}</p>}
+                </div>
+              </div>
 
-          {/* Row 2 */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <div>
-              <label htmlFor="dob" className="block text-gray-700 font-semibold mb-2">
-                Date of Joining
-              </label>
-              <input
-                type="date"
-                id="dob"
-                name="dob"
-                value={formData.dob}
-                onChange={handleChange}
-                required
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition bg-gray-50 ${
-                  errors.dob ? "border-red-500" : "border-gray-300"
-                }`}
-              />
-              {errors.dob && <p className="text-red-500 text-sm mt-1">{errors.dob}</p>}
-            </div>
-            <div>
-              <label
-                htmlFor="companyName"
-                className="block text-gray-700 font-semibold mb-2"
-              >
-                Company Name
-              </label>
-              <input
-                type="text"
-                id="companyName"
-                name="companyName"
-                placeholder="Enter company name"
-                value={formData.companyName}
-                onChange={handleChange}
-                required
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition bg-gray-50 ${
-                  errors.companyName ? "border-red-500" : "border-gray-300"
-                }`}
-              />
-              {errors.companyName && (
-                <p className="text-red-500 text-sm mt-1">{errors.companyName}</p>
-              )}
-            </div>
-            <div>
-              <label
-                htmlFor="gstNumber"
-                className="block text-gray-700 font-semibold mb-2"
-              >
-                GST Number
-              </label>
-              <input
-                type="text"
-                id="gstNumber"
-                name="gstNumber"
-                placeholder="Enter GST number"
-                value={formData.gstNumber}
-                onChange={handleChange}
-                maxLength={15}
-                required
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition bg-gray-50 ${
-                  errors.gstNumber ? "border-red-500" : "border-gray-300"
-                }`}
-              />
-              {errors.gstNumber && (
-                <p className="text-red-500 text-sm mt-1">{errors.gstNumber}</p>
-              )}
-            </div>
-          </div>
+              {/* Row 2 */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div>
+                  <label htmlFor="dob" className="block text-gray-700 font-semibold mb-2">
+                    Date of Joining
+                  </label>
+                  <input
+                    type="date"
+                    id="dob"
+                    name="dob"
+                    value={formData.dob}
+                    onChange={handleChange}
+                    required
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition bg-gray-50 ${
+                      errors.dob ? "border-red-500" : "border-gray-300"
+                    }`}
+                  />
+                  {errors.dob && <p className="text-red-500 text-sm mt-1">{errors.dob}</p>}
+                </div>
+                <div>
+                  <label
+                    htmlFor="companyName"
+                    className="block text-gray-700 font-semibold mb-2"
+                  >
+                    Company Name
+                  </label>
+                  <input
+                    type="text"
+                    id="companyName"
+                    name="companyName"
+                    placeholder="Enter company name"
+                    value={formData.companyName}
+                    onChange={handleChange}
+                    required
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition bg-gray-50 ${
+                      errors.companyName ? "border-red-500" : "border-gray-300"
+                    }`}
+                  />
+                  {errors.companyName && (
+                    <p className="text-red-500 text-sm mt-1">{errors.companyName}</p>
+                  )}
+                </div>
+                <div>
+                  <label
+                    htmlFor="gstNumber"
+                    className="block text-gray-700 font-semibold mb-2"
+                  >
+                    GST Number
+                  </label>
+                  <input
+                    type="text"
+                    id="gstNumber"
+                    name="gstNumber"
+                    placeholder="Enter GST number"
+                    value={formData.gstNumber}
+                    onChange={handleChange}
+                    maxLength={15}
+                    required
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition bg-gray-50 ${
+                      errors.gstNumber ? "border-red-500" : "border-gray-300"
+                    }`}
+                  />
+                  {errors.gstNumber && (
+                    <p className="text-red-500 text-sm mt-1">{errors.gstNumber}</p>
+                  )}
+                </div>
+              </div>
 
-          {/* Row 3 */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <div>
-              <label htmlFor="address" className="block text-gray-700 font-semibold mb-2">
-                Address
+              {/* Row 3 */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div>
+                  <label htmlFor="address" className="block text-gray-700 font-semibold mb-2">
+                    Address
+                  </label>
+                  <input
+                    type="text"
+                    id="address"
+                    name="address"
+                    placeholder="Enter your address"
+                    value={formData.address}
+                    onChange={handleChange}
+                    required
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition bg-gray-50 ${
+                      errors.address ? "border-red-500" : "border-gray-300"
+                    }`}
+                  />
+                  {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
+                </div>
+                <div>
+                  <label htmlFor="pincode" className="block text-gray-700 font-semibold mb-2">
+                    Pincode
+                  </label>
+                  <input
+                    type="text"
+                    id="pincode"
+                    name="pincode"
+                    placeholder="Enter pincode"
+                    value={formData.pincode}
+                    onChange={handleChange}
+                    maxLength={6}
+                    required
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition bg-gray-50 ${
+                      errors.pincode ? "border-red-500" : "border-gray-300"
+                    }`}
+                  />
+                  {errors.pincode && <p className="text-red-500 text-sm mt-1">{errors.pincode}</p>}
+                </div>
+                <div>
+                  <label htmlFor="state" className="block text-gray-700 font-semibold mb-2">
+                    State
+                  </label>
+                  <input
+                    type="text"
+                    id="state"
+                    name="state"
+                    placeholder="Enter state"
+                    value={formData.state}
+                    onChange={handleChange}
+                    required
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition bg-gray-50 ${
+                      errors.state ? "border-red-500" : "border-gray-300"
+                    }`}
+                  />
+                  {errors.state && <p className="text-red-500 text-sm mt-1">{errors.state}</p>}
+                </div>
+              </div>
+
+              {/* Password Section */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div className="relative">
+                  <label htmlFor="password" className="block text-gray-700 font-semibold mb-2">
+                    Password
+                  </label>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    name="password"
+                    placeholder="Enter your password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition bg-gray-50 ${
+                      errors.password ? "border-red-500" : "border-gray-300"
+                    }`}
+                  />
+                  <button
+                    type="button"
+                    onClick={togglePasswordVisibility}
+                    className="absolute right-3 top-10 text-gray-600 hover:text-blue-600"
+                  >
+                    {showPassword ? <FaEyeSlash className="text-xl" /> : <FaEye className="text-xl" />}
+                  </button>
+                  {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+                </div>
+                <div className="relative">
+                  <label
+                    htmlFor="confirmPassword"
+                    className="block text-gray-700 font-semibold mb-2"
+                  >
+                    Confirm Password
+                  </label>
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    placeholder="Confirm your password"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    required
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition bg-gray-50 ${
+                      errors.confirmPassword ? "border-red-500" : "border-gray-300"
+                    }`}
+                  />
+                  <button
+                    type="button"
+                    onClick={toggleConfirmPasswordVisibility}
+                    className="absolute right-3 top-10 text-gray-600 hover:text-blue-600"
+                  >
+                    {showConfirmPassword ? <FaEyeSlash className="text-xl" /> : <FaEye className="text-xl" />}
+                  </button>
+                  {errors.confirmPassword && (
+                    <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
+                  )}
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="mb-6">
+              <label htmlFor="otp" className="block text-gray-700 font-semibold mb-2">
+                OTP
               </label>
               <input
                 type="text"
-                id="address"
-                name="address"
-                placeholder="Enter your address"
-                value={formData.address}
-                onChange={handleChange}
-                required
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition bg-gray-50 ${
-                  errors.address ? "border-red-500" : "border-gray-300"
-                }`}
-              />
-              {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
-            </div>
-            <div>
-              <label htmlFor="pincode" className="block text-gray-700 font-semibold mb-2">
-                Pincode
-              </label>
-              <input
-                type="text"
-                id="pincode"
-                name="pincode"
-                placeholder="Enter pincode"
-                value={formData.pincode}
+                id="otp"
+                name="otp"
+                placeholder="Enter 6-digit OTP"
+                value={formData.otp}
                 onChange={handleChange}
                 maxLength={6}
                 required
                 className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition bg-gray-50 ${
-                  errors.pincode ? "border-red-500" : "border-gray-300"
+                  errors.otp ? "border-red-500" : "border-gray-300"
                 }`}
               />
-              {errors.pincode && <p className="text-red-500 text-sm mt-1">{errors.pincode}</p>}
+              {errors.otp && <p className="text-red-500 text-sm mt-1">{errors.otp}</p>}
             </div>
-            <div>
-              <label htmlFor="state" className="block text-gray-700 font-semibold mb-2">
-                State
-              </label>
-              <input
-                type="text"
-                id="state"
-                name="state"
-                placeholder="Enter state"
-                value={formData.state}
-                onChange={handleChange}
-                required
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition bg-gray-50 ${
-                  errors.state ? "border-red-500" : "border-gray-300"
-                }`}
-              />
-              {errors.state && <p className="text-red-500 text-sm mt-1">{errors.state}</p>}
-            </div>
-          </div>
-
-          {/* Password Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div className="relative">
-              <label htmlFor="password" className="block text-gray-700 font-semibold mb-2">
-                Password
-              </label>
-              <input
-                type={showPassword ? "text" : "password"}
-                id="password"
-                name="password"
-                placeholder="Enter your password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition bg-gray-50 ${
-                  errors.password ? "border-red-500" : "border-gray-300"
-                }`}
-              />
-              <button
-                type="button"
-                onClick={togglePasswordVisibility}
-                className="absolute right-3 top-10 text-gray-600 hover:text-blue-600"
-              >
-                {showPassword ? <FaEyeSlash className="text-xl" /> : <FaEye className="text-xl" />}
-              </button>
-              {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
-            </div>
-            <div className="relative">
-              <label
-                htmlFor="confirmPassword"
-                className="block text-gray-700 font-semibold mb-2"
-              >
-                Confirm Password
-              </label>
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                id="confirmPassword"
-                name="confirmPassword"
-                placeholder="Confirm your password"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition bg-gray-50 ${
-                  errors.confirmPassword ? "border-red-500" : "border-gray-300"
-                }`}
-              />
-              <button
-                type="button"
-                onClick={toggleConfirmPasswordVisibility}
-                className="absolute right-3 top-10 text-gray-600 hover:text-blue-600"
-              >
-                {showConfirmPassword ? <FaEyeSlash className="text-xl" /> : <FaEye className="text-xl" />}
-              </button>
-              {errors.confirmPassword && (
-                <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
-              )}
-            </div>
-          </div>
+          )}
 
           <button
             type="submit"
             className="w-full bg-blue-800 text-white py-3 px-4 rounded-lg hover:bg-blue-900 transition-transform transform hover:scale-105 shadow-md"
           >
-            Register
+            {isOtpSent ? "Verify OTP" : "Send OTP"}
           </button>
         </form>
 
